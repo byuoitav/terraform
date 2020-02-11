@@ -53,6 +53,16 @@ resource "kubernetes_deployment" "this" {
             container_port = var.container_port
           }
 
+          // environment vars
+          dynamic "env" {
+            for_each = var.container_env
+
+            content {
+              name  = env.key
+              value = env.value
+            }
+          }
+
           readiness_probe {
             http_get {
               port = var.container_port

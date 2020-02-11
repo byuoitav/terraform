@@ -29,6 +29,12 @@ variable "image_pull_secret" {
   default     = ""
 }
 
+variable "container_env" {
+  description = "Environment variables for the container"
+  type        = map(string)
+  default     = {}
+}
+
 variable "container_args" {
   description = "Args to run the container with"
   type        = list(string)
