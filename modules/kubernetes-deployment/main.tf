@@ -15,7 +15,7 @@ resource "kubernetes_deployment" "this" {
 
     labels = {
       "app.kubernetes.io/name"       = var.name
-      "app.kubernetes.io/version"    = var.version
+      "app.kubernetes.io/version"    = var.image_version
       "app.kubernetes.io/managed-by" = "terraform"
     }
   }
@@ -33,7 +33,7 @@ resource "kubernetes_deployment" "this" {
       metadata {
         labels = {
           "app.kubernetes.io/name"    = var.name
-          "app.kubernetes.io/version" = var.version
+          "app.kubernetes.io/version" = var.image_version
         }
       }
 
@@ -44,7 +44,7 @@ resource "kubernetes_deployment" "this" {
 
         container {
           name              = "server"
-          image             = "${var.image}:${var.version}"
+          image             = "${var.image}:${var.image_version}"
           image_pull_policy = "Always"
 
           args = var.container_args
