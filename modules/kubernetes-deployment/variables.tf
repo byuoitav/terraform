@@ -23,6 +23,12 @@ variable "repo_url" {
   type        = string
 }
 
+variable "image_pull_secret" {
+  description = "The name of the k8s secret with docker credentials needed to pull the image. See https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ for more details"
+  type        = string
+  default     = ""
+}
+
 variable "container_args" {
   description = "Args to run the container with"
   type        = list(string)

@@ -38,6 +38,10 @@ resource "kubernetes_deployment" "this" {
       }
 
       spec {
+        image_pull_secrets {
+          name = length(var.image_pull_secret) > 0 ? var.image_pull_secret : null
+        }
+
         container {
           name              = "server"
           image             = "${var.image}:${var.version}"
@@ -46,13 +50,12 @@ resource "kubernetes_deployment" "this" {
           args = var.container_args
 
           port {
-            name           = "this"
             container_port = var.container_port
           }
 
           readiness_probe {
             http_get {
-              port = "this"
+              port = var.container_port
               path = "/status"
             }
 
@@ -63,7 +66,7 @@ resource "kubernetes_deployment" "this" {
 
           liveness_probe {
             http_get {
-              port = "this"
+              port = var.container_port
               path = "/status"
             }
 
@@ -90,7 +93,7 @@ resource "kubernetes_service" "this" {
   spec {
     type = "ClusterIP"
     port {
-      port = var.container_port
+      port = 80
     }
 
     selector = {
@@ -100,6 +103,9 @@ resource "kubernetes_service" "this" {
 }
 
 resource "kubernetes_ingress" "this" {
+  // only create the ingress if the public url is set
+  count = length(var.public_url) > 0 ? 1 : 0
+
   metadata {
     name = var.name
 
@@ -149,7 +155,7 @@ resource "kubernetes_ingress" "this" {
         path {
           backend {
             service_name = kubernetes_service.this.metadata.0.name
-            service_port = var.container_port
+            service_port = 80
           }
         }
       }
