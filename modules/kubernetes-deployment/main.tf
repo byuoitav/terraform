@@ -1,33 +1,12 @@
-//terraform {
-//  backend "s3" {
-//    bucket     = "terraform-state-storage-586877430255"
-//    lock_table = "terraform-state-lock-586877430255"
-//    key        = "${var.name}.tfstate"
-//    region     = "us-west-2"
-//  }
-//}
-
-//provider "aws" {
-//  region = "us-west-2"
-//}
-
-//data "aws_ssm_parameter" "eks_cluster_endpoint" {
-//  name = "/eks/av-cluster-endpoint"
-//}
-
-//provider "kubernetes" {
-//  host = data.aws_ssm_parameter.eks_cluster_endpoint.value
-//}
-
-data "aws_ssm_parameter" "acm_cert_arn" {
-  name = "/acm/av-cert-arn"
-}
-
 module "acs" {
   source            = "github.com/byuoitav/terraform//modules/acs-info"
   env               = "prd"
   department_name   = "av"
   vpc_vpn_to_campus = true
+}
+
+data "aws_ssm_parameter" "acm_cert_arn" {
+  name = "/acm/av-cert-arn"
 }
 
 resource "kubernetes_deployment" "this" {

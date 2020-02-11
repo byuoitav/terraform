@@ -19,7 +19,7 @@ variable "container_port" {
 }
 
 variable "repo_url" {
-  description = ""
+  description = "The URL of the service's source code"
   type        = string
 }
 
