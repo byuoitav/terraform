@@ -90,6 +90,10 @@ resource "kubernetes_deployment" "this" {
       }
     }
   }
+
+  create = "5m"
+  update = "5m"
+  delete = "10m"
 }
 
 resource "kubernetes_service" "this" {
