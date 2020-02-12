@@ -103,7 +103,8 @@ resource "kubernetes_service" "this" {
   spec {
     type = "ClusterIP"
     port {
-      port = 80
+      port        = 80
+      target_port = var.container_port
     }
 
     selector = {
