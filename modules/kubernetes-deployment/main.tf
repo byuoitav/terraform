@@ -91,7 +91,7 @@ resource "kubernetes_deployment" "this" {
     }
   }
 
-  timeout {
+  timeouts {
     create = "5m"
     update = "5m"
     delete = "10m"
