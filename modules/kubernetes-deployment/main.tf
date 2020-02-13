@@ -5,6 +5,10 @@ module "acs" {
   vpc_vpn_to_campus = true
 }
 
+data "aws_ssm_parameter" "prd_alb_arn" {
+  name = "/lb/prd-arn"
+}
+
 data "aws_ssm_parameter" "acm_cert_arn" {
   name = "/acm/av-cert-arn"
 }
@@ -109,9 +113,10 @@ resource "kubernetes_service" "this" {
   }
 
   spec {
-    type = "ClusterIP"
+    type = "NodePort"
     port {
       port        = 80
+      node_port   = 38083
       target_port = var.container_port
     }
 
@@ -134,9 +139,9 @@ resource "kubernetes_ingress" "this" {
     }
 
     annotations = {
-      "kubernetes.io/ingress.class"               = "alb"
-      "alb.ingress.kubernetes.io/scheme"          = "internet-facing"
-      "alb.ingress.kubernetes.io/target-type"     = "ip"
+      "kubernetes.io/ingress.class"      = "alb"
+      "alb.ingress.kubernetes.io/scheme" = "internet-facing"
+      // "alb.ingress.kubernetes.io/target-type"     = "ip"
       "alb.ingress.kubernetes.io/subnets"         = join(",", module.acs.public_subnet_ids)
       "alb.ingress.kubernetes.io/certificate-arn" = data.aws_ssm_parameter.acm_cert_arn.value
       "alb.ingress.kubernetes.io/listen-ports" = jsonencode([
@@ -174,7 +179,7 @@ resource "kubernetes_ingress" "this" {
         path {
           backend {
             service_name = kubernetes_service.this.metadata.0.name
-            service_port = 80
+            // service_port = 80
           }
         }
       }
