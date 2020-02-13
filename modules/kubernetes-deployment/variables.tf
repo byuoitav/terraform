@@ -41,8 +41,8 @@ variable "container_args" {
   default     = []
 }
 
-variable "public_url" {
-  description = "The publicly exposed URL of the service"
-  type        = string
-  default     = ""
+variable "public_urls" {
+  description = "The publicly exposed URLs of the service"
+  type        = list(string)
+  default     = []
 }
