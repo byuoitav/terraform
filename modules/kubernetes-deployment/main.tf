@@ -122,8 +122,8 @@ resource "kubernetes_service" "this" {
 }
 
 resource "kubernetes_ingress" "this" {
-  // only create the ingress if the public url is set
-  count = length(var.public_url) > 0 ? 1 : 0
+  // only create the ingress if there is at least one public url
+  count = length(var.public_urls) > 0 ? 1 : 0
 
   metadata {
     name = var.name
