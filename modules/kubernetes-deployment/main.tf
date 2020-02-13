@@ -158,23 +158,27 @@ resource "kubernetes_ingress" "this" {
   }
 
   spec {
-    rule {
-      host = var.public_url
+    dynamic "rule" {
+      for_each = var.public_urls
 
-      http {
-        // redirect to https
-        path {
-          backend {
-            service_name = "ssl-redirect"
-            service_port = "use-annotation"
+      content {
+        host = rule.value
+
+        http {
+          // redirect to https
+          path {
+            backend {
+              service_name = "ssl-redirect"
+              service_port = "use-annotation"
+            }
           }
-        }
 
-        // forward to nodeport
-        path {
-          backend {
-            service_name = kubernetes_service.this.metadata.0.name
-            service_port = 80
+          // forward to nodeport
+          path {
+            backend {
+              service_name = kubernetes_service.this.metadata.0.name
+              service_port = 80
+            }
           }
         }
       }
