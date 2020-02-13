@@ -1,5 +1,5 @@
 variable "name" {
-  description = "The name of the service"
+  description = "The name of the service. Must be unique across the cluster."
   type        = string
 }
 
@@ -15,6 +15,11 @@ variable "image_version" {
 
 variable "container_port" {
   description = "Port of the container to expose"
+  type        = number
+}
+
+variable "node_port" {
+  description = "Port of the container to on every node. Must be unique across the cluster, and between 30000-TODO"
   type        = number
 }
 
