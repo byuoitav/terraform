@@ -18,11 +18,6 @@ variable "container_port" {
   type        = number
 }
 
-variable "node_port" {
-  description = "Port of the container to on every node. Must be unique across the cluster, and between 30000-TODO"
-  type        = number
-}
-
 variable "repo_url" {
   description = "The URL of the service's source code"
   type        = string
