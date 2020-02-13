@@ -116,7 +116,7 @@ resource "kubernetes_service" "this" {
     type = "NodePort"
     port {
       port        = 80
-      node_port   = 38083
+      node_port   = 30000
       target_port = var.container_port
     }
 
@@ -179,7 +179,7 @@ resource "kubernetes_ingress" "this" {
         path {
           backend {
             service_name = kubernetes_service.this.metadata.0.name
-            service_port = 38083
+            service_port = 30000
           }
         }
       }
