@@ -115,9 +115,10 @@ resource "kubernetes_service" "this" {
   spec {
     type = "NodePort"
     port {
-      port        = 80
-      node_port   = 30000
-      target_port = var.container_port
+      port      = 8080
+      node_port = 30000
+      protocol  = "TCP"
+      // target_port = var.container_port
     }
 
     selector = {
