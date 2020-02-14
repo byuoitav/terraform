@@ -85,29 +85,30 @@ resource "kubernetes_stateful_set" "this" {
             }
           }
 
-          // container is killed it if fails this check
-          liveness_probe {
-            http_get {
-              port = var.container_port
-              path = "/healthz"
-            }
+          // TODO figure out how to do this for grpc
+          //// container is killed it if fails this check
+          //liveness_probe {
+          //  http_get {
+          //    port = var.container_port
+          //    path = "/healthz"
+          //  }
 
-            initial_delay_seconds = 60
-            period_seconds        = 60
-            timeout_seconds       = 3
-          }
+          //  initial_delay_seconds = 60
+          //  period_seconds        = 60
+          //  timeout_seconds       = 3
+          //}
 
-          // container is isolated from new traffic if fails this check
-          readiness_probe {
-            http_get {
-              port = var.container_port
-              path = "/healthz"
-            }
+          //// container is isolated from new traffic if fails this check
+          //readiness_probe {
+          //  http_get {
+          //    port = var.container_port
+          //    path = "/healthz"
+          //  }
 
-            initial_delay_seconds = 30
-            period_seconds        = 30
-            timeout_seconds       = 3
-          }
+          //  initial_delay_seconds = 30
+          //  period_seconds        = 30
+          //  timeout_seconds       = 3
+          //}
 
           volume_mount {
             name       = "${var.name}-storage"
