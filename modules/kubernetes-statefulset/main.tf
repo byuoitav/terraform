@@ -140,12 +140,6 @@ resource "kubernetes_stateful_set" "this" {
       }
     }
   }
-
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "10m"
-  }
 }
 
 resource "kubernetes_service" "this" {
