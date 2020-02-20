@@ -9,6 +9,18 @@ data "aws_ssm_parameter" "acm_cert_arn" {
   name = "/acm/av-cert-arn"
 }
 
+data "aws_ssm_parameter" "r53_zone_id" {
+  name = "/route53/zone/av-id"
+}
+
+data "aws_ssm_parameter" "eks_lb_name" {
+  name = "/eks/lb-name"
+}
+
+data "aws_lb" "eks_lb" {
+  name = data.aws_ssm_parameter.eks_lb_name.value
+}
+
 resource "kubernetes_deployment" "this" {
   metadata {
     name = var.name
@@ -119,6 +131,21 @@ resource "kubernetes_service" "this" {
     selector = {
       "app.kubernetes.io/name" = var.name
     }
+  }
+}
+
+// create the route53 entry
+resource "aws_route53_record" "this" {
+  count = length(var.public_urls)
+
+  zone_id = data.aws_ssm_parameter.r53_zone_id.value
+  name    = var.public_urls[count.index]
+  type    = "A"
+
+  alias {
+    name                   = data.aws_lb.eks_lb.dns_name
+    zone_id                = data.aws_lb.eks_lb.zone_id
+    evaluate_target_health = false
   }
 }
 
