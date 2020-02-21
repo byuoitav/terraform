@@ -161,11 +161,11 @@ resource "kubernetes_ingress" "this" {
       "app.kubernetes.io/managed-by" = "terraform"
     }
 
-    annotations = {
+    annotations = merge(var.ingress_annotations, {
       "kubernetes.io/ingress.class"                    = "nginx"
       "nginx.ingress.kubernetes.io/ssl-redirect"       = "true"
       "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
-    }
+    })
   }
 
   spec {

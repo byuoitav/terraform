@@ -9,6 +9,18 @@ data "aws_ssm_parameter" "acm_cert_arn" {
   name = "/acm/av-cert-arn"
 }
 
+data "aws_ssm_parameter" "r53_zone_id" {
+  name = "/route53/zone/av-id"
+}
+
+data "aws_ssm_parameter" "eks_lb_name" {
+  name = "/eks/lb-name"
+}
+
+data "aws_lb" "eks_lb" {
+  name = data.aws_ssm_parameter.eks_lb_name.value
+}
+
 resource "kubernetes_storage_class" "this" {
   metadata {
     name = var.name
@@ -165,6 +177,21 @@ resource "kubernetes_service" "this" {
   }
 }
 
+// create the route53 entry
+resource "aws_route53_record" "this" {
+  count = length(var.public_urls)
+
+  zone_id = data.aws_ssm_parameter.r53_zone_id.value
+  name    = var.public_urls[count.index]
+  type    = "A"
+
+  alias {
+    name                   = data.aws_lb.eks_lb.dns_name
+    zone_id                = data.aws_lb.eks_lb.zone_id
+    evaluate_target_health = false
+  }
+}
+
 resource "kubernetes_ingress" "this" {
   // only create the ingress if there is at least one public url
   count = length(var.public_urls) > 0 ? 1 : 0
@@ -177,31 +204,19 @@ resource "kubernetes_ingress" "this" {
       "app.kubernetes.io/managed-by" = "terraform"
     }
 
-    annotations = {
-      "kubernetes.io/ingress.class"               = "alb"
-      "alb.ingress.kubernetes.io/scheme"          = "internet-facing"
-      "alb.ingress.kubernetes.io/target-type"     = "ip"
-      "alb.ingress.kubernetes.io/subnets"         = join(",", module.acs.public_subnet_ids)
-      "alb.ingress.kubernetes.io/certificate-arn" = data.aws_ssm_parameter.acm_cert_arn.value
-      "alb.ingress.kubernetes.io/listen-ports" = jsonencode([
-        { HTTP = 80 },
-        { HTTPS = 443 }
-      ])
-
-      "alb.ingress.kubernetes.io/actions.ssl-redirect" = jsonencode({
-        Type = "redirect"
-        RedirectConfig = {
-          Protocol   = "HTTPS"
-          Port       = "443"
-          StatusCode = "HTTP_301"
-        }
-      })
-
-      "alb.ingress.kubernetes.io/tags" = "env=prd,data-sensitivity=internal,repo=${var.repo_url}"
-    }
+    annotations = merge(var.ingress_annotations, {
+      "kubernetes.io/ingress.class"                    = "nginx"
+      "nginx.ingress.kubernetes.io/ssl-redirect"       = "true"
+      "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
+    })
   }
 
   spec {
+    tls {
+      secret_name = "star-av-byu-edu"
+      hosts       = var.public_urls
+    }
+
     dynamic "rule" {
       for_each = var.public_urls
 
@@ -209,15 +224,6 @@ resource "kubernetes_ingress" "this" {
         host = rule.value
 
         http {
-          // redirect to https
-          path {
-            backend {
-              service_name = "ssl-redirect"
-              service_port = "use-annotation"
-            }
-          }
-
-          // forward to nodeport
           path {
             backend {
               service_name = kubernetes_service.this.metadata.0.name

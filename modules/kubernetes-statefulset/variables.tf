@@ -57,3 +57,8 @@ variable "public_urls" {
   default     = []
 }
 
+variable "ingress_annotations" {
+  description = "Annotations to add to the ingress resource. Annotations kubernetes.io/ingress.class, nginx.ingress.kubernetes.io/ssl-redirect, nginx.ingress.kubernetes.io/force-ssl-redirect, are overwritten."
+  type        = map(string)
+  default     = {}
+}
