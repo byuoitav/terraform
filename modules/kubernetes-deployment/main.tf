@@ -163,12 +163,17 @@ resource "kubernetes_ingress" "this" {
 
     annotations = {
       "kubernetes.io/ingress.class"                    = "nginx"
-      "nginx.ingress.kubernetes.io/ssl-redirect"       = "false"
-      "nginx.ingress.kubernetes.io/force-ssl-redirect" = "false"
+      "nginx.ingress.kubernetes.io/ssl-redirect"       = "true"
+      "nginx.ingress.kubernetes.io/force-ssl-redirect" = "true"
     }
   }
 
   spec {
+    tls {
+      secret_name = "star-av-byu-edu"
+      hosts       = var.public_urls
+    }
+
     dynamic "rule" {
       for_each = var.public_urls
 
