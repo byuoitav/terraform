@@ -17,8 +17,89 @@ data "aws_ssm_parameter" "eks_lb_name" {
   name = "/eks/lb-name"
 }
 
+data "aws_ssm_parameter" "eks_cluster_name" {
+  name = "/eks/av-cluster-name"
+}
+
+data "aws_ssm_parameter" "role_boundary" {
+  name = "/acs/iam/iamRolePermissionBoundary"
+}
+
 data "aws_lb" "eks_lb" {
   name = data.aws_ssm_parameter.eks_lb_name.value
+}
+
+data "aws_caller_identity" "current" {}
+
+data "aws_eks_cluster" "selected" {
+  name = data.aws_ssm_parameter.eks_cluster_name
+}
+
+data "aws_iam_policy_document" "eks_oidc_assume_role" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(data.aws_eks_cluster.selected.identity.0.oidc.0.issuer, "https://", "")}:sub"
+      values = [
+        "system:serviceaccount:default:${var.name}",
+      ]
+    }
+
+    principals {
+      identifiers = [
+        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(data.aws_eks_cluster.selected.identity.0.oidc.0.issuer, "https://", "")}"
+      ]
+      type = "Federated"
+    }
+  }
+}
+
+resource "aws_iam_role" "this" {
+  count = var.iam_policy_doc == "" ? 0 : 1
+  name  = "eks-${data.aws_ssm_parameter.eks_av_cluster_name}-${var.name}"
+
+  assume_role_policy  = data.aws_iam_policy_document.eks_oidc_assume_role.json
+  permission_boundary = data.aws_ssm_parameter.role_boundary
+
+  tags = {
+    env  = "prd"
+    repo = var.repo_url
+  }
+
+}
+
+resource "aws_iam_policy" "this" {
+  count = var.iam_policy_doc == "" ? 0 : 1
+
+  name   = "eks-${data.aws_ssm_parameter.eks_av_cluster_name}-${var.name}"
+  policy = var.iam_policy_doc
+}
+
+resource "aws_iam_policy_attachment" "this" {
+  count = var.iam_policy_doc == "" ? 0 : 1
+
+  policy_arn = aws_iam_policy.this.arn
+  role       = aws_iam_role.this.name
+}
+
+resource "kubernetes_service_account" "this" {
+  count = var.iam_policy_doc == "" ? 0 : 1
+
+  metadata {
+    name = var.name
+
+    annotations = {
+      "eks.amazonaws.com/role-arn" = aws_iam_role.this.arn
+    }
+
+    labels = {
+      "app.kubernetes.io/name"       = var.name
+      "app.kubernetes.io/managed-by" = "terraform"
+    }
+  }
 }
 
 resource "kubernetes_deployment" "this" {
@@ -73,6 +154,19 @@ resource "kubernetes_deployment" "this" {
               name  = env.key
               value = env.value
             }
+          }
+
+          // Volume mounts
+          dynamic "volume_mount" {
+
+            for_each = var.iam_policy_doc == "" ? [] : [kubernetes_service_account.this.default_secret_name]
+
+            content {
+              mount_path = "/var/run/secrets/kubernetes.io/serviceaccount"
+              name       = volume_mount
+              read_only  = true
+            }
+
           }
 
           // container is killed it if fails this check

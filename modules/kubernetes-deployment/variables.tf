@@ -52,3 +52,9 @@ variable "ingress_annotations" {
   type        = map(string)
   default     = {}
 }
+
+variable "iam_policy_doc" {
+  description = "The IAM Policy Document to apply to the code running in this deployment."
+  type        = string
+  default     = ""
+}
