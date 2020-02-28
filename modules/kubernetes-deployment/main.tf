@@ -81,8 +81,9 @@ resource "aws_iam_policy" "this" {
 resource "aws_iam_policy_attachment" "this" {
   count = var.iam_policy_doc == "" ? 0 : 1
 
+  name       = "eks-${data.aws_ssm_parameter.eks_cluster_name}-${var.name}"
   policy_arn = aws_iam_policy.this[0].arn
-  role       = aws_iam_role.this[0].name
+  roles      = [aws_iam_role.this[0].name]
 }
 
 resource "kubernetes_service_account" "this" {
@@ -159,7 +160,7 @@ resource "kubernetes_deployment" "this" {
           // Volume mounts
           dynamic "volume_mount" {
 
-            for_each = var.iam_policy_doc == "" ? [] : [kubernetes_service_account.this.default_secret_name]
+            for_each = var.iam_policy_doc == "" ? [] : [kubernetes_service_account.this[0].default_secret_name]
 
             content {
               mount_path = "/var/run/secrets/kubernetes.io/serviceaccount"
