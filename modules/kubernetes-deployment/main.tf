@@ -61,8 +61,8 @@ resource "aws_iam_role" "this" {
   count = var.iam_policy_doc == "" ? 0 : 1
   name  = "eks-${data.aws_ssm_parameter.eks_cluster_name}-${var.name}"
 
-  assume_role_policy  = data.aws_iam_policy_document.eks_oidc_assume_role.json
-  permission_boundary = data.aws_ssm_parameter.role_boundary
+  assume_role_policy   = data.aws_iam_policy_document.eks_oidc_assume_role.json
+  permissions_boundary = data.aws_ssm_parameter.role_boundary
 
   tags = {
     env  = "prd"
@@ -81,8 +81,8 @@ resource "aws_iam_policy" "this" {
 resource "aws_iam_policy_attachment" "this" {
   count = var.iam_policy_doc == "" ? 0 : 1
 
-  policy_arn = aws_iam_policy.this.arn
-  role       = aws_iam_role.this.name
+  policy_arn = aws_iam_policy.this[0].arn
+  role       = aws_iam_role.this[0].name
 }
 
 resource "kubernetes_service_account" "this" {
@@ -92,7 +92,7 @@ resource "kubernetes_service_account" "this" {
     name = var.name
 
     annotations = {
-      "eks.amazonaws.com/role-arn" = aws_iam_role.this.arn
+      "eks.amazonaws.com/role-arn" = aws_iam_role.this[0].arn
     }
 
     labels = {
