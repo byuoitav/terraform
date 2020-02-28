@@ -59,7 +59,7 @@ data "aws_iam_policy_document" "eks_oidc_assume_role" {
 
 resource "aws_iam_role" "this" {
   count = var.iam_policy_doc == "" ? 0 : 1
-  name  = "eks-${data.aws_ssm_parameter.eks_av_cluster_name}-${var.name}"
+  name  = "eks-${data.aws_ssm_parameter.eks_cluster_name}-${var.name}"
 
   assume_role_policy  = data.aws_iam_policy_document.eks_oidc_assume_role.json
   permission_boundary = data.aws_ssm_parameter.role_boundary
@@ -74,7 +74,7 @@ resource "aws_iam_role" "this" {
 resource "aws_iam_policy" "this" {
   count = var.iam_policy_doc == "" ? 0 : 1
 
-  name   = "eks-${data.aws_ssm_parameter.eks_av_cluster_name}-${var.name}"
+  name   = "eks-${data.aws_ssm_parameter.eks_cluster_name}-${var.name}"
   policy = var.iam_policy_doc
 }
 
