@@ -32,7 +32,7 @@ data "aws_lb" "eks_lb" {
 data "aws_caller_identity" "current" {}
 
 data "aws_eks_cluster" "selected" {
-  name = data.aws_ssm_parameter.eks_cluster_name
+  name = data.aws_ssm_parameter.eks_cluster_name.value
 }
 
 data "aws_iam_policy_document" "eks_oidc_assume_role" {
@@ -59,7 +59,7 @@ data "aws_iam_policy_document" "eks_oidc_assume_role" {
 
 resource "aws_iam_role" "this" {
   count = var.iam_policy_doc == "" ? 0 : 1
-  name  = "eks-${data.aws_ssm_parameter.eks_cluster_name}-${var.name}"
+  name  = "eks-${data.aws_ssm_parameter.eks_cluster_name.value}-${var.name}"
 
   assume_role_policy   = data.aws_iam_policy_document.eks_oidc_assume_role.json
   permissions_boundary = data.aws_ssm_parameter.role_boundary
@@ -74,14 +74,14 @@ resource "aws_iam_role" "this" {
 resource "aws_iam_policy" "this" {
   count = var.iam_policy_doc == "" ? 0 : 1
 
-  name   = "eks-${data.aws_ssm_parameter.eks_cluster_name}-${var.name}"
+  name   = "eks-${data.aws_ssm_parameter.eks_cluster_name.value}-${var.name}"
   policy = var.iam_policy_doc
 }
 
 resource "aws_iam_policy_attachment" "this" {
   count = var.iam_policy_doc == "" ? 0 : 1
 
-  name       = "eks-${data.aws_ssm_parameter.eks_cluster_name}-${var.name}"
+  name       = "eks-${data.aws_ssm_parameter.eks_cluster_name.value}-${var.name}"
   policy_arn = aws_iam_policy.this[0].arn
   roles      = [aws_iam_role.this[0].name]
 }
