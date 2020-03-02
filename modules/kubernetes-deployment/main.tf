@@ -58,8 +58,7 @@ data "aws_iam_policy_document" "eks_oidc_assume_role" {
 }
 
 resource "aws_iam_role" "this" {
-  count = var.iam_policy_doc == "" ? 0 : 1
-  name  = "eks-${data.aws_ssm_parameter.eks_cluster_name.value}-${var.name}"
+  name = "eks-${data.aws_ssm_parameter.eks_cluster_name.value}-${var.name}"
 
   assume_role_policy   = data.aws_iam_policy_document.eks_oidc_assume_role.json
   permissions_boundary = data.aws_ssm_parameter.role_boundary
@@ -72,28 +71,22 @@ resource "aws_iam_role" "this" {
 }
 
 resource "aws_iam_policy" "this" {
-  count = var.iam_policy_doc == "" ? 0 : 1
-
   name   = "eks-${data.aws_ssm_parameter.eks_cluster_name.value}-${var.name}"
   policy = var.iam_policy_doc
 }
 
 resource "aws_iam_policy_attachment" "this" {
-  count = var.iam_policy_doc == "" ? 0 : 1
-
   name       = "eks-${data.aws_ssm_parameter.eks_cluster_name.value}-${var.name}"
-  policy_arn = aws_iam_policy.this[0].arn
-  roles      = [aws_iam_role.this[0].name]
+  policy_arn = aws_iam_policy.this.arn
+  roles      = [aws_iam_role.this.name]
 }
 
 resource "kubernetes_service_account" "this" {
-  count = var.iam_policy_doc == "" ? 0 : 1
-
   metadata {
     name = var.name
 
     annotations = {
-      "eks.amazonaws.com/role-arn" = aws_iam_role.this[0].arn
+      "eks.amazonaws.com/role-arn" = aws_iam_role.this.arn
     }
 
     labels = {
@@ -158,16 +151,10 @@ resource "kubernetes_deployment" "this" {
           }
 
           // Volume mounts
-          dynamic "volume_mount" {
-
-            for_each = var.iam_policy_doc == "" ? [] : [kubernetes_service_account.this[0].default_secret_name]
-
-            content {
-              mount_path = "/var/run/secrets/kubernetes.io/serviceaccount"
-              name       = volume_mount
-              read_only  = true
-            }
-
+          volume_mount {
+            mount_path = "/var/run/secrets/kubernetes.io/serviceaccount"
+            name       = kubernetes_service_account.this.default_secret_name
+            read_only  = true
           }
 
           // container is killed it if fails this check
