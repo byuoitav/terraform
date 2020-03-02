@@ -61,7 +61,7 @@ resource "aws_iam_role" "this" {
   name = "eks-${data.aws_ssm_parameter.eks_cluster_name.value}-${var.name}"
 
   assume_role_policy   = data.aws_iam_policy_document.eks_oidc_assume_role.json
-  permissions_boundary = data.aws_ssm_parameter.role_boundary
+  permissions_boundary = data.aws_ssm_parameter.role_boundary.value
 
   tags = {
     env  = "prd"
