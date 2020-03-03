@@ -94,7 +94,6 @@ resource "kubernetes_service_account" "this" {
       "app.kubernetes.io/managed-by" = "terraform"
     }
   }
-  automount_service_account_token = true
 }
 
 resource "kubernetes_deployment" "this" {
@@ -157,6 +156,13 @@ resource "kubernetes_deployment" "this" {
             }
           }
 
+          // Volume mounts
+          volume_mount {
+            mount_path = "/var/run/secrets/kubernetes.io/serviceaccount"
+            name       = kubernetes_service_account.this.default_secret_name
+            read_only  = true
+          }
+
           // container is killed it if fails this check
           liveness_probe {
             http_get {
@@ -179,6 +185,14 @@ resource "kubernetes_deployment" "this" {
             initial_delay_seconds = 30
             period_seconds        = 30
             timeout_seconds       = 3
+          }
+        }
+
+        volume {
+          name = kubernetes_service_account.this.default_secret_name
+
+          secret {
+            secret_name = kubernetes_service_account.this.default_secret_name
           }
         }
       }
