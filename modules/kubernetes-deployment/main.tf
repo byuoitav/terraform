@@ -125,6 +125,8 @@ resource "kubernetes_deployment" "this" {
       }
 
       spec {
+        service_account_name = kubernetes_service_account.this.metadata.0.name
+
         dynamic "image_pull_secrets" {
           for_each = length(var.image_pull_secret) > 0 ? [var.image_pull_secret] : []
 
