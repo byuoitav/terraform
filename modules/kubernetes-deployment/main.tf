@@ -156,6 +156,16 @@ resource "kubernetes_deployment" "this" {
             }
           }
 
+          env {
+            name  = "AWS_WEB_IDENTITY_TOKEN_FILE"
+            value = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+          }
+
+          env {
+            name  = "AWS_ROLE_ARN"
+            value = aws_iam_role.this.arn
+          }
+
           // Volume mounts
           volume_mount {
             mount_path = "/var/run/secrets/kubernetes.io/serviceaccount"
