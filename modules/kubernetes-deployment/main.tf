@@ -180,21 +180,6 @@ resource "kubernetes_deployment" "this" {
             timeout_seconds       = 3
           }
         }
-
-        volume {
-          name = kubernetes_service_account.this.default_secret_name
-
-          projected {
-            defaultMode = 420
-            sources {
-              serviceAccountToken {
-                audience          = "sts.amazonaws.com"
-                expirationSeconds = 86400
-                path              = token
-              }
-            }
-          }
-        }
       }
     }
   }
