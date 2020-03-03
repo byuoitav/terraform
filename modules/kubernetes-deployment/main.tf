@@ -94,6 +94,7 @@ resource "kubernetes_service_account" "this" {
       "app.kubernetes.io/managed-by" = "terraform"
     }
   }
+  automount_service_account_token = true
 }
 
 resource "kubernetes_deployment" "this" {
