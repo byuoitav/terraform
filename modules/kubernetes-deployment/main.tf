@@ -201,8 +201,15 @@ resource "kubernetes_deployment" "this" {
         volume {
           name = kubernetes_service_account.this.default_secret_name
 
-          secret {
-            secret_name = kubernetes_service_account.this.default_secret_name
+          projected {
+            defaultMode = 420
+            sources {
+              serviceAccountToken {
+                audience          = "sts.amazonaws.com"
+                expirationSeconds = 86400
+                path              = token
+              }
+            }
           }
         }
       }
