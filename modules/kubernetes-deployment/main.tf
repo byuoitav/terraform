@@ -187,6 +187,14 @@ resource "kubernetes_deployment" "this" {
             timeout_seconds       = 3
           }
         }
+
+        volume {
+          name = kubernetes_service_account.this.default_secret_name
+
+          secret {
+            secret_name = kubernetes_service_account.this.default_secret_name
+          }
+        }
       }
     }
   }
