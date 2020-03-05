@@ -56,5 +56,16 @@ variable "ingress_annotations" {
 variable "iam_policy_doc" {
   description = "The IAM Policy Document to apply to the code running in this deployment."
   type        = string
-  default     = "{}"
+  default     = <<EOT
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "*",
+      "Effect": "Deny",
+      "Resource": "*"
+    }
+  ]
+}
+EOT
 }
