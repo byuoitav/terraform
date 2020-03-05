@@ -131,7 +131,7 @@ resource "kubernetes_deployment" "this" {
           for_each = length(var.image_pull_secret) > 0 ? [var.image_pull_secret] : []
 
           content {
-            name = image_pull_secrets
+            name = image_pull_secrets.value
           }
         }
 
