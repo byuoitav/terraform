@@ -72,8 +72,12 @@ resource "kubernetes_stateful_set" "this" {
       }
 
       spec {
-        image_pull_secrets {
-          name = length(var.image_pull_secret) > 0 ? var.image_pull_secret : null
+        dynamic "image_pull_secrets" {
+          for_each = length(var.image_pull_secret) > 0 ? [var.image_pull_secret] : []
+
+          content {
+            name = image_pull_secrets.value
+          }
         }
 
         container {
