@@ -165,7 +165,7 @@ resource "kubernetes_deployment" "this" {
 
           // container is killed it if fails this check
           dynamic "liveness_probe" {
-            count = var.health_check ? 1 : 0
+            for_each = var.health_check ? [1] : []
 
             content {
               http_get {
@@ -181,7 +181,7 @@ resource "kubernetes_deployment" "this" {
 
           // container is isolated from new traffic if fails this check
           dynamic "readiness_probe" {
-            count = var.health_check ? 1 : 0
+            for_each = var.health_check ? [1] : []
 
             content {
               http_get {
