@@ -116,17 +116,6 @@ data "aws_security_group" "ssh_rdp" {
   }
 }
 
-data "aws_security_group" "rds" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.vpc.id]
-  }
-  filter {
-    name   = "group-name"
-    values = ["*rds*"]
-  }
-}
-
 data "aws_security_group" "oracle" {
   count = local.oracle_security_group_id != null ? 1 : 0
   id    = local.oracle_security_group_id
