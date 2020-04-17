@@ -164,27 +164,35 @@ resource "kubernetes_deployment" "this" {
           }
 
           // container is killed it if fails this check
-          liveness_probe {
-            http_get {
-              port = var.container_port
-              path = "/healthz"
-            }
+          dynamic "liveness_probe" {
+            count = var.health_check ? 1 : 0
 
-            initial_delay_seconds = 60
-            period_seconds        = 60
-            timeout_seconds       = 3
+            content {
+              http_get {
+                port = var.container_port
+                path = "/healthz"
+              }
+
+              initial_delay_seconds = 60
+              period_seconds        = 60
+              timeout_seconds       = 3
+            }
           }
 
           // container is isolated from new traffic if fails this check
-          readiness_probe {
-            http_get {
-              port = var.container_port
-              path = "/healthz"
-            }
+          dynamic "readiness_probe" {
+            count = var.health_check ? 1 : 0
 
-            initial_delay_seconds = 30
-            period_seconds        = 30
-            timeout_seconds       = 3
+            content {
+              http_get {
+                port = var.container_port
+                path = "/healthz"
+              }
+
+              initial_delay_seconds = 30
+              period_seconds        = 30
+              timeout_seconds       = 3
+            }
           }
         }
 

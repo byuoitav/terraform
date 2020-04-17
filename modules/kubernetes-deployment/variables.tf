@@ -69,3 +69,9 @@ variable "iam_policy_doc" {
 }
 EOT
 }
+
+variable "health_check" {
+  description = "Enable/Disable health check"
+  type        = bool
+  default     = true
+}
