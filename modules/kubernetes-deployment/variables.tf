@@ -75,3 +75,9 @@ variable "health_check" {
   type        = bool
   default     = true
 }
+
+variable "replicas" {
+  description = "The number of replicas of the pod to create"
+  type        = number
+  default     = 1
+}
