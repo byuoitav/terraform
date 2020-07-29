@@ -81,3 +81,9 @@ variable "replicas" {
   type        = number
   default     = 1
 }
+
+variable "private" {
+  description = "Only allow access to this service from the private (10.0.0.0/8) network"
+  type        = bool
+  default     = false
+}

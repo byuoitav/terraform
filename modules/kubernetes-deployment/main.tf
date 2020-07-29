@@ -17,6 +17,10 @@ data "aws_ssm_parameter" "eks_lb_name" {
   name = "/eks/lb-name"
 }
 
+data "aws_ssm_parameter" "eks_lb_name_private" {
+  name = "/eks/lb-name-private"
+}
+
 data "aws_ssm_parameter" "eks_cluster_name" {
   name = "/eks/av-cluster-name"
 }
@@ -26,7 +30,7 @@ data "aws_ssm_parameter" "role_boundary" {
 }
 
 data "aws_lb" "eks_lb" {
-  name = data.aws_ssm_parameter.eks_lb_name.value
+  name = var.private ? data.aws_ssm_parameter.eks_lb_name_private.value : data.aws_ssm_parameter.eks_lb_name.value
 }
 
 data "aws_caller_identity" "current" {}
