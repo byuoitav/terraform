@@ -112,7 +112,7 @@ data "aws_security_group" "ssh_rdp" {
   }
   filter {
     name   = "group-name"
-    values = ["*ssh*"]
+    values = ["*ssh_rdp_sg_vpn*"]
   }
 }
 
