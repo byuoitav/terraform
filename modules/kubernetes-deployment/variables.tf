@@ -87,3 +87,13 @@ variable "private" {
   type        = bool
   default     = false
 }
+
+variable "cpu_limit" {
+  type    = string
+  default = ""
+}
+
+variable "memory_limit" {
+  type    = string
+  default = ""
+}

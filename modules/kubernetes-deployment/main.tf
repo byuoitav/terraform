@@ -198,6 +198,13 @@ resource "kubernetes_deployment" "this" {
               timeout_seconds       = 3
             }
           }
+
+          resources {
+            limits {
+              cpu    = var.cpu_limit
+              memory = var.memory_limit
+            }
+          }
         }
 
         volume {
