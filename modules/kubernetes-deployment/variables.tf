@@ -88,12 +88,14 @@ variable "private" {
   default     = false
 }
 
-variable "cpu_limit" {
-  type    = string
-  default = ""
-}
-
-variable "memory_limit" {
-  type    = string
-  default = ""
+variable "resource_limits" {
+  description = "Maximum resources the containers created by this deployment can consume"
+  type = object({
+    cpu    = string
+    memory = string
+  })
+  default = {
+    cpu    = null
+    memory = null
+  }
 }

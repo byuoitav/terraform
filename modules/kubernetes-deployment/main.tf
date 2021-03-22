@@ -151,10 +151,7 @@ resource "kubernetes_deployment" "this" {
           }
 
           resources {
-            limits = {
-              cpu    = var.cpu_limit
-              memory = var.memory_limit
-            }
+            limits = (var.resource_limits.cpu != null || var.resource_limits.memory != null) ? var.resource_limits : null
           }
 
 
