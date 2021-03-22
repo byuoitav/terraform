@@ -150,6 +150,14 @@ resource "kubernetes_deployment" "this" {
             container_port = var.container_port
           }
 
+          resources {
+            limits = {
+              cpu    = var.cpu_limit
+              memory = var.memory_limit
+            }
+          }
+
+
           // environment vars
           dynamic "env" {
             for_each = var.container_env
@@ -196,13 +204,6 @@ resource "kubernetes_deployment" "this" {
               initial_delay_seconds = 30
               period_seconds        = 30
               timeout_seconds       = 3
-            }
-          }
-
-          resources {
-            limits {
-              cpu    = var.cpu_limit
-              memory = var.memory_limit
             }
           }
         }
